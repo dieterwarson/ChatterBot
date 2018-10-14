@@ -156,6 +156,9 @@ class SQLStorageAdapter(StorageAdapter):
 
         tags = set(kwargs.pop('tags', []))
 
+        if not 'stemmed_text' in kwargs:
+            kwargs['stemmed_text'] = self.stemmer.stem(kwargs['text'])
+
         statement = Statement(**kwargs)
 
         for _tag in tags:
@@ -194,6 +197,9 @@ class SQLStorageAdapter(StorageAdapter):
         for statement_data in statements:
 
             tags = set(statement_data.pop('tags', []))
+
+            if not 'stemmed_text' in statement_data:
+                statement_data['stemmed_text'] = self.stemmer.stem(statement_data['text'])
 
             statement = Statement(**statement_data)
 
@@ -247,6 +253,8 @@ class SQLStorageAdapter(StorageAdapter):
             record.in_response_to = statement.in_response_to
 
             record.created_at = statement.created_at
+
+            record.stemmed_text = self.stemmer.stem(record.text)
 
             for _tag in statement.tags:
                 tag = session.query(Tag).filter_by(name=_tag).first()
